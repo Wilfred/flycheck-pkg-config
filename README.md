@@ -14,3 +14,6 @@ flycheck-pkg-config, then press `i x`.
 ## Usage
 
 `M-x flycheck-pkg-config`
+
+![screenshot](screenshot.png)
+
