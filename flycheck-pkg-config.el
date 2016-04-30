@@ -47,6 +47,19 @@
          (libs (--map (-first-item (s-split " " it)) lines)))
     (setq flycheck-pkg-config--libs (-sort #'flycheck-pkg-config--ignore-case-less-p libs))))
 
+(defun flycheck-pkg-config--include-paths (library-name)
+  "Get a list of include paths for LIBRARY-NAME.
+Raises an error if pkg-config can't find any paths for this library."
+  (let* (;; Find the include flags, e.g. "-I/usr/lib/foo"
+         (pkgconfig-cmd (format "pkg-config --cflags %s" library-name))
+         (cc-args (s-trim (shell-command-to-string pkgconfig-cmd))))
+    (if (s-starts-with? "-I" cc-args)
+        ;; pkg-config has found a library with this name.
+        (let* ((include-args (s-split " " cc-args))
+               (lib-paths (--map (s-chop-prefix "-I" it) include-args)))
+          lib-paths)
+      (user-error cc-args))))
+
 ;;;###autoload
 (defun flycheck-pkg-config ()
   "Configure flycheck to use additional includes
@@ -55,26 +68,17 @@ when checking the current buffer."
   ;; Find out all the libraries installed on this system.
   (unless flycheck-pkg-config--libs
     (flycheck-pkg-config--set-libs))
-  (let* (;; Prompt for a library name.
-         (lib-name (completing-read "Library name: " flycheck-pkg-config--libs))
-         ;; Find the include flags, e.g. "-I/usr/lib/foo"
-         (pkgconfig-cmd (format "pkg-config --cflags %s" lib-name))
-         (cc-args (s-trim (shell-command-to-string pkgconfig-cmd))))
-    (if (s-starts-with? "-I" cc-args)
-        ;; pkg-config has found a library with this name.
-        (let* ((include-args (s-split " " cc-args))
-               (lib-paths (--map (s-chop-prefix "-I" it) include-args)))
-          ;; Only set in this buffer.
-          (make-local-variable 'flycheck-clang-include-path)
-          ;; Add include paths to `flycheck-clang-include-path' unless
-          ;; already present.
-          (setq flycheck-clang-include-path
-                (-union flycheck-clang-include-path
-                        lib-paths))
-          (message "flycheck-clang-include-path: %s"
-                   flycheck-clang-include-path))
-      ;; Otherwise, no such library with this name.
-      (user-error cc-args))))
+  (let* ((lib-name (completing-read "Library name: " flycheck-pkg-config--libs))
+         ;; Find the include paths, e.g. "-I/usr/lib/foo"
+         (include-paths (flycheck-pkg-config--include-paths lib-name)))
+    ;; Only set in this buffer.
+    (make-local-variable 'flycheck-clang-include-path)
+    ;; Add include paths to `flycheck-clang-include-path' unless
+    ;; already present.
+    (setq flycheck-clang-include-path
+          (-union flycheck-clang-include-path include-paths))
+    (message "flycheck-clang-include-path: %s"
+             flycheck-clang-include-path)))
 
 (provide 'flycheck-pkg-config)
 ;;; flycheck-pkg-config.el ends here
