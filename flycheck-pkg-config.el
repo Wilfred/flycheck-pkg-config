@@ -39,6 +39,14 @@
 (defun flycheck-pkg-config--ignore-case-less-p (s1 s2)
   (string< (downcase s1) (downcase s2)))
 
+(defun flycheck-pkg-config--set-libs ()
+  "Set `flycheck-pkg-config--libs' by calling pkg-config."
+  (let* ((all-libs-with-names
+          (shell-command-to-string "pkg-config --list-all"))
+         (lines (s-split "\n" (s-trim all-libs-with-names)))
+         (libs (--map (-first-item (s-split " " it)) lines)))
+    (setq flycheck-pkg-config--libs (-sort #'flycheck-pkg-config--ignore-case-less-p libs))))
+
 ;;;###autoload
 (defun flycheck-pkg-config ()
   "Configure flycheck to use additional includes
@@ -46,12 +54,7 @@ when checking the current buffer."
   (interactive)
   ;; Find out all the libraries installed on this system.
   (unless flycheck-pkg-config--libs
-    (let* ((all-libs-with-names
-            (shell-command-to-string "pkg-config --list-all"))
-           (lines (s-split "\n" (s-trim all-libs-with-names)))
-           (libs (--map (-first-item (s-split " " it)) lines)))
-      (setq flycheck-pkg-config--libs (-sort #'flycheck-pkg-config--ignore-case-less-p libs))))
-
+    (flycheck-pkg-config--set-libs))
   (let* (;; Prompt for a library name.
          (lib-name (completing-read "Library name: " flycheck-pkg-config--libs))
          ;; Find the include flags, e.g. "-I/usr/lib/foo"
