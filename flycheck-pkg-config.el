@@ -1,6 +1,6 @@
 ;;; flycheck-pkg-config.el --- configure flycheck using pkg-config  -*- lexical-binding: t; -*-
 
-;; Copyright (C) 2016  
+;; Copyright (C) 2016
 
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; Keywords: flycheck
@@ -53,11 +53,11 @@ Raises an error if pkg-config can't find any paths for this library."
   (let* (;; Find the include flags, e.g. "-I/usr/lib/foo"
          (pkgconfig-cmd (format "pkg-config --cflags %s" library-name))
          (cc-args (s-trim (shell-command-to-string pkgconfig-cmd))))
-    (if (s-starts-with? "-I" cc-args)
+    (if (s-contains? "-I" cc-args)
         ;; pkg-config has found a library with this name.
-        (let* ((include-args (s-split " " cc-args))
-               (lib-paths (--map (s-chop-prefix "-I" it) include-args)))
-          lib-paths)
+	(let (ret)
+	  (dolist (x (s-split " " cc-args) ret)
+	    (if (s-starts-with? "-I" x) (setq ret (cons (s-chop-prefix "-I" x) ret)))))
       (user-error cc-args))))
 
 ;;;###autoload
