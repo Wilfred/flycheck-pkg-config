@@ -77,8 +77,8 @@ when checking the current buffer."
     ;; already present.
     (setq flycheck-clang-include-path
           (-union flycheck-clang-include-path include-paths))
-    (message "flycheck-clang-include-path: %s"
-             flycheck-clang-include-path)))
+    (message "Added to flycheck-clang-include-path: %s"
+             (s-join " " (--map (format "\"%s\"" it) include-paths)))))
 
 (provide 'flycheck-pkg-config)
 ;;; flycheck-pkg-config.el ends here
