@@ -5,7 +5,7 @@
 ;; Author: Wilfred Hughes <me@wilfred.me.uk>
 ;; Keywords: flycheck
 ;; Version: 0.1
-;; Package-Requires: ((dash "2.8.0") (s "1.9.0") (cl-lib "0.5"))
+;; Package-Requires: ((dash "2.8.0") (s "1.9.0"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
