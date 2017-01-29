@@ -58,7 +58,7 @@ Raises an error if pkg-config can't find any paths for this library."
 	(let (ret)
 	  (dolist (x (s-split " " cc-args) ret)
 	    (if (s-starts-with? "-I" x) (setq ret (cons (s-chop-prefix "-I" x) ret)))))
-      (user-error cc-args))))
+      (user-error "Could not find an -I include in: %s" cc-args))))
 
 ;;;###autoload
 (defun flycheck-pkg-config ()
