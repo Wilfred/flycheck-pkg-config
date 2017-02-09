@@ -5,6 +5,10 @@
 `flycheck-pkg-config` provides a convenient way for configuring
 flycheck to use C library headers.
 
+It configures `flycheck-clang-include-path`,
+`flycheck-gcc-include-path` and `flycheck-cppcheck-include-path`
+interactively.
+
 ## Installation
 
 You can install flycheck-pkg-config from
