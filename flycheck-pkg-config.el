@@ -61,15 +61,17 @@ Raises an error if pkg-config can't find any paths for this library."
       (user-error "Could not find an -I include in: %s" cc-args))))
 
 ;;;###autoload
-(defun flycheck-pkg-config ()
+(defun flycheck-pkg-config (lib-name)
   "Configure flycheck to use additional includes
 when checking the current buffer."
-  (interactive)
-  ;; Find out all the libraries installed on this system.
-  (unless flycheck-pkg-config--libs
-    (flycheck-pkg-config--set-libs))
-  (let* ((lib-name (completing-read "Library name: " flycheck-pkg-config--libs))
-         ;; Find the include paths, e.g. "-I/usr/lib/foo"
+  (interactive
+   (progn
+     ;; Find out all the libraries installed on this system.
+     (unless flycheck-pkg-config--libs
+       (flycheck-pkg-config--set-libs))
+     (list (completing-read "Library name: " flycheck-pkg-config--libs))))
+
+  (let* (;; Find the include paths, e.g. "-I/usr/lib/foo"
          (include-paths (flycheck-pkg-config--include-paths lib-name)))
     ;; Only set in this buffer.
     (make-local-variable 'flycheck-clang-include-path)
